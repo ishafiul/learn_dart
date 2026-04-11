@@ -1,0 +1,47 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { discoverDartLevels, firstLessonHref } from "../lib/discover-dart";
+import { sitePath } from "../lib/site-path";
+
+const levels = discoverDartLevels();
+const start = firstLessonHref(levels);
+---
+
+<BaseLayout
+  title="Learn Dart & Flutter — structured paths for serious learners"
+  description="Pick the Dart or Flutter track, follow a visual roadmap, and read lessons as focused slides. Static, fast, and search-friendly."
+  canonicalPath="/"
+>
+  <SiteHeader />
+  <main>
+    <section class="hero shell">
+      <p class="hero__kicker">Field guide</p>
+      <h1 class="hero__title">Master Dart. Then own Flutter.</h1>
+      <p class="hero__lead">
+        One hub for opinionated roadmaps and markdown lessons. Dart content ships today; Flutter arrives as the
+        curriculum grows.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href={start ?? sitePath("/dart")}>Start Dart track</a>
+        <a class="btn btn--ghost" href={sitePath("/dart")}>Dart roadmap</a>
+        <a class="btn btn--ghost" href={sitePath("/flutter")}>Flutter (soon)</a>
+      </div>
+    </section>
+
+    <section class="shell grid-cards" aria-label="Tracks">
+      <a class="card" href={sitePath("/dart")} style="text-decoration:none;color:inherit;">
+        <p class="card__label">Track</p>
+        <h2 class="card__title">Dart language</h2>
+        <p class="card__text">
+          Levels 0–15: async, isolates, SOLID, DI — each lesson split into slides with keyboard navigation.
+        </p>
+      </a>
+      <a class="card" href={sitePath("/flutter")} style="text-decoration:none;color:inherit;">
+        <p class="card__label">Track</p>
+        <h2 class="card__title">Flutter UI</h2>
+        <p class="card__text">Coming soon. Same roadmap + slide mechanics when the Flutter curriculum lands.</p>
+      </a>
+    </section>
+  </main>
+</BaseLayout>

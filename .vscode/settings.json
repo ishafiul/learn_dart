@@ -1,0 +1,4 @@
+{
+  "dart.flutterSdkPath": "${env:HOME}/.asdf/installs/flutter/3.41.2-stable",
+  "dart.sdkPath": "${env:HOME}/.asdf/installs/flutter/3.41.2-stable/bin/cache/dart-sdk"
+}

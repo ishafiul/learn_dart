@@ -1,0 +1,24 @@
+---
+import { pathnameAfterBase, sitePath } from "../lib/site-path";
+
+const rel = pathnameAfterBase(Astro.url.pathname);
+const dartActive = rel.startsWith("/dart");
+const flutterActive = rel.startsWith("/flutter");
+const homeActive = rel === "/" || rel === "";
+---
+
+<header class="site-header">
+  <div class="shell site-header__inner">
+    <div class="site-header__brands">
+      <a class="brand" href={sitePath("/")}>learn<span>.</span>dart<span>+</span>flutter</a>
+      <a class="mark-shafi" href="https://shafi.dev/frontend-design" rel="noopener noreferrer">
+        <span class="mark-shafi__sig">shafi</span><span class="mark-shafi__dot">.</span><span class="mark-shafi__tld">dev</span>
+      </a>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href={sitePath("/")} aria-current={homeActive ? "page" : undefined}>Home</a>
+      <a href={sitePath("/dart")} aria-current={dartActive ? "page" : undefined}>Dart</a>
+      <a href={sitePath("/flutter")} aria-current={flutterActive ? "page" : undefined}>Flutter</a>
+    </nav>
+  </div>
+</header>

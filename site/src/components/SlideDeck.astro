@@ -1,0 +1,73 @@
+---
+import { sitePath } from "../lib/site-path";
+
+type Slide = { html: string };
+
+type Props = {
+  slides: Slide[];
+  lessonUrl: string;
+  nextHref: string | null;
+  levelHref: string;
+};
+
+const { slides, lessonUrl, nextHref, levelHref } = Astro.props;
+const storageKey = `dart-slide:${lessonUrl}`;
+const progressKey = "dart-continue";
+---
+
+<section class="dart-slide__viewer" aria-label="Lesson slides">
+  <div
+    class="deck dart-slide__deck"
+    data-lesson-url={lessonUrl}
+    data-storage-key={storageKey}
+    data-progress-key={progressKey}
+    data-next-href={nextHref ?? ""}
+  >
+    {
+      slides.map((s, i) => (
+        <div class:list={["slide", { "is-active": i === 0 }]} data-slide-index={i}>
+          <div class="slide-body" set:html={s.html} />
+        </div>
+      ))
+    }
+  </div>
+  <div class="dart-slide__controls deck-controls">
+    <div class="dart-slide__controls-main">
+      <div class="btn-row dart-slide__nav-btns">
+        <button type="button" class="btn btn--ghost" data-action="prev" aria-label="Previous slide">
+          ← Prev
+        </button>
+        <button type="button" class="btn btn--primary" data-action="next" aria-label="Next slide">
+          Next →
+        </button>
+      </div>
+      <div class="dart-slide__progress">
+        <div class="dart-slide__progress-bar" aria-hidden="true">
+          <div class="dart-slide__progress-fill" data-progress-fill></div>
+        </div>
+        <p class="deck-progress dart-slide__progress-label" data-progress aria-live="polite" />
+      </div>
+    </div>
+  </div>
+  <div class="btn-row dart-slide__next" data-next-lesson style="display:none;">
+    {
+      nextHref ? (
+        <a class="btn btn--primary" href={nextHref} data-next-link>
+          Next lesson →
+        </a>
+      ) : (
+        <a class="btn btn--primary" href={sitePath("/dart")}>
+          Back to Dart roadmap →
+        </a>
+      )
+    }
+    <a class="btn btn--ghost" href={levelHref}>
+      Level overview
+    </a>
+  </div>
+</section>
+
+<script>
+  import { initSlideDecks } from "../scripts/slide-deck.ts";
+  initSlideDecks();
+</script>

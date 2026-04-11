@@ -1,0 +1,23 @@
+{
+  "name": "learn-dart-web",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "cf:types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.3.0",
+    "astro": "^5.7.0",
+    "marked": "^15.0.0",
+    "shiki": "^4.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "wrangler": "^4.81.1"
+  }
+}

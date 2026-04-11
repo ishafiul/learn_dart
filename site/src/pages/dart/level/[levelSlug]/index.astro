@@ -1,0 +1,94 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../../components/SiteHeader.astro";
+import { discoverDartLevels } from "../../../../lib/discover-dart";
+import { sitePath } from "../../../../lib/site-path";
+
+export function getStaticPaths() {
+  const levels = discoverDartLevels();
+  return levels.map((L) => ({
+    params: { levelSlug: L.levelSlug },
+    props: { level: L },
+  }));
+}
+
+const { level } = Astro.props;
+const first = level.lessons[0];
+---
+
+<BaseLayout
+  title={`${level.title} — Dart level ${level.number}`}
+  description={`Lessons for ${level.title}: ${level.lessons.length} markdown modules as slide decks.`}
+  canonicalPath={`/dart/level/${level.levelSlug}`}
+>
+  <SiteHeader />
+  <main class="dart-level shell">
+    <section class="dart-level__hero">
+      <div class="dart-level__intro">
+        <p class="dart-level__crumb">
+          <a href={sitePath("/dart")}>Dart roadmap</a>
+        </p>
+        <p class="dart-hero__kicker">Level {level.number}</p>
+        <h1 class="dart-level__title">{level.title}</h1>
+        <p class="dart-level__lead">
+          Each markdown file opens as a slide deck: one slide per <code>##</code> heading. Order follows the folder
+          README when it lists files.
+        </p>
+        <div class="btn-row">
+          {
+            first ? (
+              <a class="btn btn--primary" href={sitePath(`/dart/level/${level.levelSlug}/${first.slug}`)}>
+                Start first lesson
+              </a>
+            ) : null
+          }
+          <a class="btn btn--ghost" href={sitePath("/dart")}>All levels</a>
+        </div>
+      </div>
+      <aside class="dart-atlas dart-atlas--single" aria-label="Level summary">
+        <div class="dart-atlas__stat">
+          <span class="dart-atlas__num">{level.lessons.length}</span>
+          <span class="dart-atlas__lbl">slide modules</span>
+        </div>
+        <p class="dart-atlas__cite">
+          Inside a lesson, use arrow keys or space to move between slides. Progress can sync to Continue on the roadmap.
+        </p>
+      </aside>
+    </section>
+
+    <section class="dart-level__lessons" aria-labelledby="level-lessons-heading">
+      <header class="dart-level__lessons-head">
+        <p class="dart-map__eyebrow">In this level</p>
+        <h2 id="level-lessons-heading" class="dart-level__lessons-title">
+          Lesson modules
+        </h2>
+        <p class="dart-map__deck">
+          Filenames match the repo; slugs are what you see in the URL path.
+        </p>
+      </header>
+      <ol class="dart-timeline">
+        {
+          level.lessons.map((lesson, idx) => {
+            const name = lesson.filename.replace(/\.md$/i, "");
+            const href = sitePath(`/dart/level/${level.levelSlug}/${lesson.slug}`);
+            return (
+              <li class="dart-step dart-level__step" style={`--dart-i:${idx}`}>
+                <span class="dart-step__marker">{idx + 1}</span>
+                <a class="dart-level-lesson" href={href}>
+                  <div class="dart-level-lesson__top">
+                    <h3 class="dart-level-lesson__name">{name}</h3>
+                    <span class="dart-step__badge">Slides</span>
+                  </div>
+                  <p class="dart-level-lesson__slug">{lesson.slug}</p>
+                  <span class="dart-level-lesson__go" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </section>
+  </main>
+</BaseLayout>

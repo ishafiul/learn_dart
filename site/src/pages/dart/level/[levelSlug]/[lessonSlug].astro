@@ -1,0 +1,80 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../../components/SiteHeader.astro";
+import SlideDeck from "../../../../components/SlideDeck.astro";
+import {
+  discoverDartLevels,
+  findNextLesson,
+  loadLessonSource,
+} from "../../../../lib/discover-dart";
+import { parseLessonMarkdown } from "../../../../lib/parse-lesson";
+import { sitePath } from "../../../../lib/site-path";
+
+export async function getStaticPaths() {
+  const levels = discoverDartLevels();
+  const out: {
+    params: { levelSlug: string; lessonSlug: string };
+    props: {
+      title: string;
+      description: string;
+      slides: { html: string }[];
+      nextHref: string | null;
+      levelHref: string;
+      lessonUrl: string;
+      canonicalPath: string;
+    };
+  }[] = [];
+
+  for (const L of levels) {
+    for (const lesson of L.lessons) {
+      const raw = loadLessonSource(lesson.absPath);
+      const parsed = await parseLessonMarkdown(raw);
+      const next = findNextLesson(levels, L.levelSlug, lesson.slug);
+      const plain = parsed.slides[0]?.html?.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() ?? "";
+      const canonicalPath = `/dart/level/${L.levelSlug}/${lesson.slug}`;
+      out.push({
+        params: { levelSlug: L.levelSlug, lessonSlug: lesson.slug },
+        props: {
+          title: `${parsed.title} · Dart`,
+          description: plain.slice(0, 155),
+          slides: parsed.slides.map((s) => ({ html: s.html })),
+          nextHref: next?.href ?? null,
+          levelHref: sitePath(`/dart/level/${L.levelSlug}`),
+          lessonUrl: sitePath(canonicalPath),
+          canonicalPath,
+        },
+      });
+    }
+  }
+  return out;
+}
+
+const { title, description, slides, nextHref, levelHref, lessonUrl, canonicalPath } = Astro.props;
+const lessonTitle = title.replace(" · Dart", "");
+const courseJson = {
+  "@context": "https://schema.org",
+  "@type": "Course",
+  name: title,
+  description,
+  provider: { "@type": "Organization", name: "Learn Dart & Flutter" },
+  educationalLevel: "Beginner to advanced",
+};
+---
+
+<BaseLayout title={title} description={description} canonicalPath={canonicalPath} ogType="article">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(courseJson)} />
+  <SiteHeader />
+  <main class="dart-slide shell deck-wrap">
+    <header class="dart-slide__head">
+      <nav class="dart-slide__crumbs" aria-label="Breadcrumb">
+        <a href={sitePath("/dart")}>Roadmap</a>
+        <span class="dart-slide__sep" aria-hidden="true">→</span>
+        <a href={levelHref}>Level</a>
+        <span class="dart-slide__sep" aria-hidden="true">→</span>
+        <span class="dart-slide__here">{lessonTitle}</span>
+      </nav>
+      <p class="dart-slide__hint">← → or space · progress saves for Continue on the roadmap</p>
+    </header>
+    <SlideDeck slides={slides} lessonUrl={lessonUrl} nextHref={nextHref} levelHref={levelHref} />
+  </main>
+</BaseLayout>

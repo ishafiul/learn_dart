@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import { sitePath } from "../../lib/site-path";
+---
+
+<BaseLayout
+  title="Flutter track — coming soon"
+  description="The Flutter learning path will mirror the Dart experience: roadmap, slides, and static publishing."
+  canonicalPath="/flutter"
+>
+  <SiteHeader />
+  <main class="shell coming-soon">
+    <div>
+      <p class="hero__kicker">Flutter</p>
+      <h1>Almost here</h1>
+      <p>
+        The Flutter roadmap and lessons will publish in this same site — same typography, same slide reader, same SEO
+        pipeline.
+      </p>
+      <div class="btn-row" style="justify-content:center;margin-top:1.5rem;">
+        <a class="btn btn--primary" href={sitePath("/dart")}>Explore Dart meanwhile</a>
+        <a class="btn btn--ghost" href={sitePath("/")}>Home</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

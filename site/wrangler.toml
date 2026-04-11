@@ -1,0 +1,8 @@
+name = "learn-dart-flutter"
+compatibility_date = "2025-04-01"
+
+[vars]
+BASE_PATH = "/learn-dart-flutter"
+
+[assets]
+directory = "./dist"

@@ -1,0 +1,144 @@
+---
+import * as fs from "node:fs";
+import * as path from "node:path";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import { DART_CONTENT_ROOT } from "../../lib/paths";
+import { parseRoadmapLevels } from "../../lib/parse-roadmap";
+import { discoverDartLevels, firstLessonHref, getFlatLessonSequence } from "../../lib/discover-dart";
+import { sitePath } from "../../lib/site-path";
+
+const levels = discoverDartLevels();
+const startHref = firstLessonHref(levels) ?? "#";
+const roadmapPath = path.join(DART_CONTENT_ROOT, "roadmap.md");
+const roadmapSource = fs.existsSync(roadmapPath) ? fs.readFileSync(roadmapPath, "utf8") : "";
+const roadmapLevels = parseRoadmapLevels(roadmapSource);
+const byNumber = new Map(levels.map((l) => [l.number, l]));
+const firstSeq = getFlatLessonSequence(levels)[0];
+const totalLessons = levels.reduce((n, L) => n + L.lessons.length, 0);
+const levelsLive = levels.filter((L) => L.lessons.length > 0).length;
+const roadmapTotal = roadmapLevels.length;
+const wiredInRoadmap = roadmapLevels.filter((r) => byNumber.has(r.number)).length;
+---
+
+<BaseLayout
+  title="Dart learning roadmap — slides & levels"
+  description="Follow the Dart curriculum from setup through isolates and dependency injection. Each lesson is a slide deck generated from markdown."
+  canonicalPath="/dart"
+  ogType="website"
+>
+  <SiteHeader />
+  <main class="dart-hub">
+    <section class="dart-hero shell">
+      <div class="dart-hero__main">
+        <p class="dart-hero__kicker">Dart track</p>
+        <h1 class="dart-hero__title">Roadmap you can actually finish.</h1>
+        <p class="dart-hero__lead">
+          Markdown in, static HTML out. One idea per slide; keyboard through the deck, then step to the next lesson when
+          you are ready.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href={firstSeq ? startHref : sitePath("/dart")} id="dart-start">Get started</a>
+          <a class="btn btn--ghost" href="#" id="dart-continue">Continue</a>
+        </div>
+        <p class="dart-hero__fineprint">
+          Continue resumes your last slide via local storage in your browser — no accounts.
+        </p>
+      </div>
+      <aside class="dart-atlas" aria-label="Curriculum snapshot">
+        <div class="dart-atlas__grid">
+          <div class="dart-atlas__stat">
+            <span class="dart-atlas__num">{totalLessons}</span>
+            <span class="dart-atlas__lbl">slide lessons live</span>
+          </div>
+          <div class="dart-atlas__stat">
+            <span class="dart-atlas__num">{levelsLive}</span>
+            <span class="dart-atlas__lbl">levels with content</span>
+          </div>
+          <div class="dart-atlas__stat">
+            <span class="dart-atlas__num">{wiredInRoadmap}/{roadmapTotal}</span>
+            <span class="dart-atlas__lbl">roadmap steps wired</span>
+          </div>
+        </div>
+        <p class="dart-atlas__cite">
+          Headings and blurbs mirror <code>dart/roadmap.md</code>; links only appear when that level exists in the repo.
+        </p>
+      </aside>
+    </section>
+
+    <section class="dart-map shell" aria-label="Dart roadmap">
+      <header class="dart-map__head">
+        <div class="dart-map__intro">
+          <p class="dart-map__eyebrow">Table of contents</p>
+          <h2 class="dart-map__title">Curriculum spine</h2>
+          <p class="dart-map__deck">
+            Work top to bottom. Each stop opens the level index: pick a markdown module and read it as a slide deck.
+          </p>
+        </div>
+        <p class="dart-map__pull">
+          The line is the promise — discrete levels, cumulative skill. Orange nodes are live; muted ones are planned.
+        </p>
+      </header>
+      <ol class="dart-timeline">
+        {
+          roadmapLevels.map((r, i) => {
+            const hit = byNumber.get(r.number);
+            const href = hit ? sitePath(`/dart/level/${hit.levelSlug}`) : null;
+            const lessonCount = hit?.lessons.length ?? 0;
+            return (
+              <li class="dart-step" style={`--dart-i:${i}`}>
+                <span class="dart-step__marker" aria-hidden="true">
+                  {r.number}
+                </span>
+                <article class:list={["dart-step__card", href ? "dart-step__card--live" : "dart-step__card--hold"]}>
+                  <div class="dart-step__top">
+                    <h3 class="dart-step__name">{r.title}</h3>
+                    {href && lessonCount > 0 ? (
+                      <span class="dart-step__badge">{lessonCount} lessons</span>
+                    ) : null}
+                    {!href ? <span class="dart-step__badge dart-step__badge--muted">Planned</span> : null}
+                  </div>
+                  {r.summary ? <p class="dart-step__summary">{r.summary}</p> : null}
+                  <div class="dart-step__foot">
+                    {href ? (
+                      <a class="dart-step__cta" href={href}>
+                        Open level <span class="dart-step__cta-arrow" aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      <span class="dart-step__soon">Folder not in repo yet</span>
+                    )}
+                  </div>
+                </article>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </section>
+  </main>
+  <footer class="shell footer">
+    <p>Tip: use ← → or space inside a lesson to move between slides.</p>
+  </footer>
+</BaseLayout>
+
+<script is:inline define:vars={{ startHref, firstLesson: firstSeq?.href ?? "" }}>
+  const continueBtn = document.getElementById("dart-continue");
+  const startBtn = document.getElementById("dart-start");
+  try {
+    const last = localStorage.getItem("dart-continue");
+    if (continueBtn) {
+      if (last && last.startsWith("/")) {
+        continueBtn.setAttribute("href", last);
+      } else if (firstLesson) {
+        continueBtn.setAttribute("href", firstLesson);
+      } else {
+        continueBtn.setAttribute("href", startHref);
+      }
+    }
+    if (startBtn && startHref && startHref !== "#") {
+      startBtn.setAttribute("href", startHref);
+    }
+  } catch {
+    if (continueBtn && firstLesson) continueBtn.setAttribute("href", firstLesson);
+  }
+</script>
